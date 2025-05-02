@@ -1,6 +1,6 @@
-from threading import Thread, Lock
+from threading import Thread
 
-
+# not ganna lie, no idea what this does, but works I think
 class NewThread(Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
         Thread.__init__(self, group, target, name, args, kwargs)

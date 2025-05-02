@@ -80,9 +80,6 @@ def handle_title_junk(title, part, a):
     return title, part, artists
 
 
-what = ""
-
-
 def normalize(a):
     # first completely remove redundant phrases and lil bits, it ain't a bonus track to us :( </3
     for r in ["original mix", "original", "?", "'", ".",
@@ -238,4 +235,4 @@ if __name__ == "__main__":
         update_playlist(local_playlist_id, track_ids, 5)
 
     if len(unique_liked_track_ids) != 0:
-        update_playlist(unique_playlist_id, unique_liked_track_ids, 5)
+        update_playlist(unique_playlist_id, unique_liked_track_ids)

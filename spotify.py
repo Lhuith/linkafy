@@ -9,7 +9,7 @@ from utils import fileSeperator, print_b, file_to_array, print_g, print_r, print
 spotify_fetch_error = "spotify fetch error"
 spotify_data_store = "output/spotify.txt"
 
-
+# oompa loompa job that does the actual processing of spotify json madness
 def read_spotify_results(start, end, pageSize):
     tracks = []
     for i in range(end - start):
@@ -31,10 +31,14 @@ def read_spotify_results(start, end, pageSize):
     return tracks
 
 
+# grab users liked song list (can be generalized maybe) and dumps/stores song names and ids to a
+# unique and normal liked dict/list/file that we use to compare with later and extract ids stored in said dict
 def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_path, write_to_unique):
     likeSpotifyList = file_to_array(write_to_liked_path)
     spotifyUniqueSongListFromFile = file_to_dict(write_to_unique)
 
+    # magic black box that gives you everything you ever wanted
+    # from the users spotify liked playlist that is
     results = sp.current_user_saved_tracks()
     total = results['total']
 
@@ -55,6 +59,7 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
 
     threads = []
     # break out into threads here
+    # sound out the little monkey squad to get them sweet sweet likes songs and ids
     for i in range(total_threads):
         threads.append(NewThread(target=read_spotify_results,
                                  args=(i * workSize, (i + 1) * workSize, page_size)))
@@ -93,6 +98,8 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
 lock = threading.Lock()
 
 
+# lil oompa-oompa thread worker job that takes slices from track_ids and dumps to playlist
+# please note the max slice size is 100, anymore then that and spotify calls the http police
 def add_songs(start, end, pl_id, track_ids, page_size):
     lock.acquire()
     for i in range(end - start):
@@ -105,13 +112,14 @@ def add_songs(start, end, pl_id, track_ids, page_size):
     lock.release()
     print_b(f"thread ended")
 
-
+# if so inclined, generate a playlist from code, but outside runtime tracking of the id, I wish thy luck, or im dumb
 def create_play_list(name, description):
     return sp.user_playlist_create(username, name, description=description)
 
 
-# max amount of items we can send concurrently for spotify api
-def update_playlist(playlist_id, track_ids, total_threads, page_size=100):
+# update a playlist, using playlist id and track_ids[] passed in, also an option
+# to change tread count and page size
+def update_playlist(playlist_id, track_ids, total_threads=5, page_size=100):
     sp.playlist_replace_items(playlist_id, [])
     print_g(f"")
     print_b(f" -- # of songs to add {len(track_ids)} to {playlist_id}")
