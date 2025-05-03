@@ -1,10 +1,12 @@
+import struct
+from io import BytesIO
+
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3
 from mutagen.mp4 import MP4
 
 from error import log_error
 from utils import fileSeperator, print_g
-
 
 def build_song(title, artist):
     return f"{title} {fileSeperator} {artist}"
@@ -24,7 +26,6 @@ def mutey_get_tag(file, ext):
                 cover = tags['APIC:'].data
         case 'm4a':
             tags = MP4(file)
-            print(tags.pprint())
             title = tags['\xa9nam']
             artists = tags['\xa9ART']
             if 'covr' in tags:

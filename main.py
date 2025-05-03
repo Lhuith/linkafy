@@ -218,8 +218,10 @@ if __name__ == "__main__":
 
     # not_in_spotify = file_to_array('input/not_in_spotify.txt')
     # print_r(f"spotify shame amount: {len(not_in_spotify)}")
-    #
-    music_convert(local_music_path, ['mp3', 'm4a'], 'm4a')
+
+    # convert all songs in a given path to specified format
+    # this attempts to keep tags/cover art as close to original as possible
+    music_convert(local_music_path, ['mp3', 'm4a'], 'mp3')
 
     # # get and write spotify liked to file
     # spotify_song_map = write_spotify_liked_to_file(
