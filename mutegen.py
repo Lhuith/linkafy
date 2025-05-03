@@ -5,11 +5,15 @@ from error import log_error
 from utils import fileSeperator, fileNameSeperator
 
 
+# build file name output (as opposed to the tags within the metadata)
 def build_file_name(title, artist):
     return f"{artist} {fileNameSeperator} {title}"
 
+
+# used and read within the app for sorting and matching
 def build_song(title, artist):
     return f"{title} {fileSeperator} {artist}"
+
 
 # splits on ext and returns a sanely (yea I know why) keyed/value dict
 def mutey_get_tag(file, ext):
@@ -29,7 +33,6 @@ def mutey_get_tag(file, ext):
             artists = tags['\xa9ART']
             if 'covr' in tags:
                 cover = tags['covr'][0]
-                # print(cover[0])
         case _:
             log_error("extension case error", f"extension {ext} not handled for tag reading")
     return {

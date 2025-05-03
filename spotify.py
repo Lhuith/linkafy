@@ -13,9 +13,7 @@ spotify_fetch_error = "spotify fetch error"
 def read_spotify_results(start, end, pageSize):
     tracks = []
     for i in range(end - start):
-        pageIndex = (i + start) * pageSize
-        pageResults = sp.current_user_saved_tracks(pageSize, pageIndex)
-        for item in pageResults['items']:
+        for item in sp.current_user_saved_tracks(pageSize, (i + start) * pageSize)['items']:
             track = item['track']
             title = track['name']
             if title == "":
@@ -43,6 +41,8 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
     total = results['total']
 
     # don't need to update cache
+    # this is safer to use/check as since the data on spotify's said hardly changes
+    # usually only the length of lists
     if len(likeSpotifyList) == total:
         print_g(f"SPOTIFY CACHE DOESN'T NEED UPDATING! {len(likeSpotifyList)} == {total}")
         # return unique list, not the full list, as we need to compare what we don't have
@@ -50,24 +50,29 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
     else:
         print_r(f"SPOTIFY NEED UPDATING! {len(likeSpotifyList)} != {total}")
 
+    # break work out into "sets" as reading from spotify is limited to 50 results
     print_r(f"Total songs is: {total}")
     sets = math.ceil(results['total'] / page_size)
     print_r(f"total page sets ({page_size}) are: {sets}")
 
+    # break the work set size across total threads provided
     workSize = math.ceil(sets / total_threads)
     print_r(f"total work/{total_threads} is {workSize}")
 
     threads = []
-    # break out into threads here
     # sound out the little monkey squad to get them sweet sweet likes songs and ids
     for i in range(total_threads):
         threads.append(NewThread(target=read_spotify_results,
                                  args=(i * workSize, (i + 1) * workSize, page_size)))
 
+    # begins a quantum entanglement process, where it processes the question "Life, the Universe,
+    # and Everything?" its 42, and then it starts the above threads
     for t in threads:
         t.start()
 
     results = []
+    # not 100% how to safely do this, look in threads.py, where it constructs helper functions to have a thread
+    # return its value, which I append to the above result array to further process below
     for t in threads:
         results += t.join()
 
@@ -81,7 +86,7 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
     for song in results:
         # add songs to list to make sure we don't have duplicates (hopefully)
         uniqueMap[song[0]] = song[1]
-
+        # write out to write_to_liked_path txt file,
         f.write(song[0] + '\n')
     f.close()
 
@@ -114,6 +119,7 @@ def add_songs(start, end, pl_id, track_ids, page_size):
 
 
 # if so inclined, generate a playlist from code, but outside runtime tracking of the id, I wish thy luck, or im dumb
+# fun fact: spotify doesn't tell you if a playlist is deleted as far as im aware
 def create_play_list(name, description):
     return sp.user_playlist_create(username, name, description=description)
 

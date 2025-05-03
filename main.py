@@ -34,7 +34,7 @@ def get_remixer(a):
 
 
 # self-explanatory, complete waste of time to comment on, and so I will not, in fact
-# I will keep continue to state how irrelevant it is to comment on this one function
+# I will continue to state how irrelevant it is to comment on this one function
 # but also this takes a new list of artists and ... & a & b & c's appends to back of artist string
 def add_to_artist(new_artists, artist, a):
     for artist_to_add in new_artists:

@@ -49,10 +49,11 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
     print(new_file_path)
     match to:
         case 'mp3':
-            print(f"yay {to}")
             song.export(new_file_path, format=to, bitrate='320k', tags=tags)
             if cover != b'':
                 img = Image.open(io.BytesIO(bytes(cover)))
+                # https://stackoverflow.com/questions/47346399/how-do-i-add-cover-image-to-a-mp3-file-using-mutagen-in-python
+                # tanks harshil9968
                 song_mp3 = MP3(new_file_path, ID3=ID3)
                 song_mp3.tags.add(
                     APIC(
@@ -65,7 +66,6 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
                 )
                 song_mp3.save()
         case 'ogg':
-            print(f"yay {to}")
             song.export(new_file_path, format=to, bitrate='320k', tags=tags)
             if cover != b'':
                 song_ogg = OggVorbis(new_file_path)
@@ -81,7 +81,6 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
                 song_ogg["metadata_block_picture"] = [base64.b64encode(flac_image.write()).decode("ascii")]
                 song_ogg.save()
         case 'm4a':
-            print("yay m4a")
             song.export(new_file_path, format='ipod', bitrate='320k', tags=tags)
 
             # https://stackoverflow.com/questions/37897801/embedding-album-cover-in-mp4-file-using-mutagen
@@ -95,7 +94,7 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
             log_error("to case error", f"conversion to extension {to} handled")
 
 
-# takes a collection of music and oggafies them, this making them superior
+# takes a collection of music and to'afies them to your desired format, thus making them superior in every way
 def music_convert(folder_path, extensions, to):
     # set output path if not exist already
     output_folder = folder_path + f"/Conversion/{to.lower()}"
