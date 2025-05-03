@@ -3,7 +3,8 @@ import re
 from rapidfuzz import fuzz as rapidfuzz
 from unidecode import unidecode
 
-from env import local_playlist_id, unique_playlist_id
+from conversion import music_convert
+from env import local_playlist_id, unique_playlist_id, local_music_path
 from local import read_song_files
 from spotify import write_spotify_liked_to_file, update_playlist
 from utils import print_c, print_r, file_to_array, print_b, fileSeperator, print_g
@@ -33,7 +34,7 @@ def get_remixer(a):
 
 
 # self-explanatory, complete waste of time to comment on, and so I will not, in fact
-# I will keep continuing on stating how irrelevant it is to comment on this one function
+# I will keep continuing to stating how irrelevant it is to comment on this one function
 # but also this takes a new list of artists and ... & a & b & c's appends to back of artist string
 def add_to_artist(new_artists, artist, a):
     for artist_to_add in new_artists:
@@ -46,6 +47,9 @@ def add_to_artist(new_artists, artist, a):
 # just last minute sort, since either the local is dumb, or spotify is dumb with ordering
 # but forced reordering removes that problem
 def clean_artist(artist):
+    # why lord
+    artist = artist.replace("featuring", "&")
+
     artists = artist.split(" & ")
     artists.sort()
     return ' & '.join([a for a in artists])
@@ -59,7 +63,7 @@ def handle_title_junk(title, part, a):
     for junk_split in [" - ", "[", "("]:
         split_by_junk = part.split(junk_split)
         if len(split_by_junk) > 1:
-            # should be feat. artist in this side
+            # SHOULD be feat. artist in this side
             part = split_by_junk[0].strip()
             wth_print_p(f" ---- {part}", a)
             # other junk, that if not an artist, we slap back on title
@@ -212,27 +216,30 @@ def compare_song_maps(ignore_list, spotifile_dict, local_songs):
 if __name__ == "__main__":
     print_c(f"Running Spotify Local/App cleanup")
 
-    not_in_spotify = file_to_array('input/not_in_spotify.txt')
-    print_r(f"spotify shame amount: {len(not_in_spotify)}")
+    # not_in_spotify = file_to_array('input/not_in_spotify.txt')
+    # print_r(f"spotify shame amount: {len(not_in_spotify)}")
+    #
+    music_convert(local_music_path, ['mp3', 'm4a'], 'm4a')
 
-    # get and write spotify liked to file
-    spotify_song_map = write_spotify_liked_to_file(
-        1, 50, 5, "output/liked_songs.txt", "output/unique_liked_songs.txt")
-
-    # search local folder and compare with unique
-    local_songs_map = read_song_files(
-        "/Volumes/Vault/.Documents/Media/Music", "output/local_songs.txt", ['mp3', 'm4a'], True)
-
-    # string in checker, look at wth.py, checks both spotify and local songs for certain title during search
-    # and prints out the matching/normalization process
-    set_what("")
-    # compare and return
-    track_ids, unique_liked_track_ids = compare_song_maps(not_in_spotify, spotify_song_map, local_songs_map)
-
-    # create playlist with match songs
-    # only if all songs were accounted for (cleaned, matched and excluded in not_in_spotify.txt)
-    if len(track_ids) != 0:
-        update_playlist(local_playlist_id, track_ids, 5)
-
-    if len(unique_liked_track_ids) != 0:
-        update_playlist(unique_playlist_id, unique_liked_track_ids)
+    # # get and write spotify liked to file
+    # spotify_song_map = write_spotify_liked_to_file(
+    #     1, 50, 5, "output/liked_songs.txt", "output/unique_liked_songs.txt")
+    #
+    # # search local folder and compare with unique
+    # local_songs_map = read_song_files(
+    #     local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], False)
+    # #
+    # # string in checker, look at wth.py, checks both spotify and local songs for certain title during search
+    # # and prints out the matching/normalization process
+    # set_what("")
+    # # compare and return
+    # track_ids, unique_liked_track_ids = compare_song_maps(not_in_spotify, spotify_song_map, local_songs_map)
+    #
+    # # create playlist with match songs
+    # # only if all songs were accounted for (cleaned, matched and excluded in not_in_spotify.txt)
+    # if len(track_ids) != 0:
+    #     update_playlist(local_playlist_id, track_ids, 5)
+    #
+    # if len(unique_liked_track_ids) != 0:
+    #     if len(unique_liked_track_ids) != 0:
+    #         update_playlist(unique_playlist_id, unique_liked_track_ids)

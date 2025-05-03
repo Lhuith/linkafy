@@ -1,6 +1,7 @@
 # what titles and artists will be split by cause
 # this industry can't make up its mind
 import datetime
+import glob
 import os
 
 fileSeperator = '*'
@@ -87,3 +88,7 @@ def file_to_array(file_path):
 
 def time_pretty():
     return datetime.datetime.now()
+
+
+def get_files_by_ext(folder_path, extensions):
+    return [g for ext in extensions for g in glob.glob(folder_path + f'/*.{ext}')]
