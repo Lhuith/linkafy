@@ -7,7 +7,7 @@ from threads import NewThread
 from utils import fileSeperator, print_b, file_to_array, print_g, print_r, print_c, dicSeperator, file_to_dict, print_y
 
 spotify_fetch_error = "spotify fetch error"
-spotify_data_store = "output/spotify.txt"
+
 
 # oompa loompa job that does the actual processing of spotify json madness
 def read_spotify_results(start, end, pageSize):
@@ -112,6 +112,7 @@ def add_songs(start, end, pl_id, track_ids, page_size):
     lock.release()
     print_b(f"thread ended")
 
+
 # if so inclined, generate a playlist from code, but outside runtime tracking of the id, I wish thy luck, or im dumb
 def create_play_list(name, description):
     return sp.user_playlist_create(username, name, description=description)
@@ -147,6 +148,7 @@ def update_playlist(playlist_id, track_ids, total_threads=5, page_size=100):
 
     for t in threads:
         t.join()
+
 
 def search_for_song(songs_list):
     cap = 0

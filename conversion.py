@@ -1,25 +1,21 @@
 import base64
-import binascii
 import glob
 import io
 import os
-from io import BytesIO
 
+from PIL import Image
 from joblib import Parallel, delayed
-from mutagen import flac
-from mutagen.easyid3 import EasyID3
 from mutagen.flac import Picture
 from mutagen.id3 import APIC, ID3
-
+from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
 from pydub import AudioSegment
-from mutagen.mp3 import MP3
-from error import log_error
-from mutegen import mutey_get_tag, build_song, build_file_name
-from utils import get_files_by_ext, print_g, print_r, extSeperator, print_b
 from pydub.utils import mediainfo
-from PIL import Image
+
+from error import log_error
+from mutegen import mutey_get_tag, build_file_name
+from utils import extSeperator, print_b
 
 
 def build_file_path(output_folder, title, artist, to):
