@@ -6,7 +6,7 @@ from unidecode import unidecode
 from conversion import music_convert
 from env import local_playlist_id, unique_playlist_id, local_music_path
 from local import read_song_files
-from spotify import write_spotify_liked_to_file, update_playlist
+from spotify import write_spotify_liked_to_file, update_playlist, search_for_song
 from utils import print_c, print_r, file_to_array, print_b, fileSeperator, print_g
 from wth import wth_print_w, wth_print_p, wth_print_y, wth_print_r, wth_print_g, set_what
 
@@ -229,7 +229,8 @@ if __name__ == "__main__":
     #
     # # search local folder and compare with unique
     # local_songs_map = read_song_files(
-    #     local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], False)
+    #     local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], True)
+    # search_for_song(local_songs_map)
     # #
     # # string in checker, look at wth.py, checks both spotify and local songs for certain title during search
     # # and prints out the matching/normalization process

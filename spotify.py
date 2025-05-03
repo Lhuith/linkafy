@@ -147,3 +147,15 @@ def update_playlist(playlist_id, track_ids, total_threads=5, page_size=100):
 
     for t in threads:
         t.join()
+
+def search_for_song(songs_list):
+    cap = 0
+    for song in songs_list:
+        # if cap > 10:
+        #     break
+        # for spotify_res in sp.search(song, 5)['tracks']['items']:
+        #     # print(song)
+        #     print()
+        #     print(spotify_res.keys())
+        #     print()
+        cap += 1

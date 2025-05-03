@@ -4,6 +4,7 @@ import datetime
 import glob
 import os
 
+fileNameSeperator = '-'
 fileSeperator = '*'
 dicSeperator = '>>>'
 extSeperator = '::'

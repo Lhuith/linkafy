@@ -1,16 +1,15 @@
-import struct
-from io import BytesIO
-
-from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3
 from mutagen.mp4 import MP4
 
 from error import log_error
-from utils import fileSeperator, print_g
+from utils import fileSeperator, fileNameSeperator
+
+
+def build_file_name(title, artist):
+    return f"{artist} {fileNameSeperator} {title}"
 
 def build_song(title, artist):
     return f"{title} {fileSeperator} {artist}"
-
 
 # splits on ext and returns a sanely (yea I know why) keyed/value dict
 def mutey_get_tag(file, ext):

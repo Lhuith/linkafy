@@ -19,7 +19,6 @@ def mutugen_handle(ext_path):
         log_error(tag_parse_error, f"error parsing {ext} for {path}")
         return ""
 
-
 # Reads song files from the specified folder
 def read_song_files(folder_path, local_song_path, extensions, skip_read):
     if skip_read:
