@@ -1,10 +1,15 @@
 import math
 import threading
+import urllib
+import urllib.parse
+from unidecode import unidecode
 
 from env import username, sp
 from error import log_error
+from mutegen import build_song
 from threads import NewThread
-from utils import fileSeperator, print_b, file_to_array, print_g, print_r, print_c, dicSeperator, file_to_dict, print_y
+from utils import fileSeperator, print_b, file_to_array, print_g, print_r, print_c, dicSeperator, file_to_dict, print_y, \
+    print_p, print_w
 
 spotify_fetch_error = "spotify fetch error"
 
@@ -156,14 +161,38 @@ def update_playlist(playlist_id, track_ids, total_threads=5, page_size=100):
         t.join()
 
 
+def query_builder(title, artist):
+    # https://developer.spotify.com/documentation/web-api/reference/search
+    # ':' = %3A, ' ' = %20
+    # note: %2520 is encoding for '%20' as in ' ' -> %20 -> '%2520'
+    # I dont know if the example is wrong, but it would suggest they are doing double encoding
+    # or got the example wrong or my brain smol
+    # example: track%3ADoxy%2520artist%3AMiles%2520Davis
+
+    extra = []
+    if 'remix' in title.lower():
+        extra.append('remix ')
+
+    query = f"{' '.join([e for e in extra])}track:{title} artist:{artist}".replace(' ', '%20')
+    return urllib.parse.quote(query)
+
+
 def search_for_song(songs_list):
-    cap = 0
     for song in songs_list:
-        # if cap > 10:
-        #     break
-        # for spotify_res in sp.search(song, 5)['tracks']['items']:
-        #     # print(song)
-        #     print()
-        #     print(spotify_res.keys())
-        #     print()
-        cap += 1
+        [title, artist] = song.split(fileSeperator)
+        q = query_builder(title.strip(), artist.strip())
+
+        res = sp.search(q, type="track", limit=20, offset=0)
+
+        print_w(q)
+        print_b(build_song(title, artist))
+        for t in res['tracks']['items']:
+            print_p(f"'title' -- {t['name']}")
+        # for t in res['artists']['items']:
+        #     print_g(f"'artist' -- {t['name']}")
+        # artists = []
+
+        # for a in res['artists']:
+        #     artists.append(a['name'])
+
+        # print_p(f" -- {build_song(res['name'], ', '.join([a for a in artists]))}")
