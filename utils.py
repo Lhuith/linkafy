@@ -25,31 +25,31 @@ class bcolors:
 
 
 def print_p(message):
-    print(bcolors.OKMEG + message)
+    print(bcolors.OKMEG + f"{message}")
 
 
 def print_c(message):
-    print(bcolors.OKCYAN + message)
+    print(bcolors.OKCYAN + f"{message}")
 
 
 def print_w(message):
-    print(bcolors.ENDC + message)
+    print(bcolors.ENDC + f"{message}")
 
 
 def print_y(message):
-    print(bcolors.WARNING + message)
+    print(bcolors.WARNING + f"{message}")
 
 
 def print_r(message):
-    print(bcolors.FAIL + message)
+    print(bcolors.FAIL + f"{message}")
 
 
 def print_b(message):
-    print(bcolors.OKBLUE + message)
+    print(bcolors.OKBLUE + f"{message}")
 
 
 def print_g(message):
-    print(bcolors.OKGREEN + message)
+    print(bcolors.OKGREEN + f"{message}")
 
 
 def file_exists(file_path):

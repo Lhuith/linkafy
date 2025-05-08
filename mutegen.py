@@ -2,7 +2,7 @@ from mutagen.id3 import ID3
 from mutagen.mp4 import MP4
 
 from error import log_error
-from utils import fileSeperator, fileNameSeperator
+from utils import fileSeperator, fileNameSeperator, print_w
 
 
 # build file name output (as opposed to the tags within the metadata)

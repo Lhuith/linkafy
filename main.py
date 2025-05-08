@@ -7,7 +7,7 @@ from conversion import music_convert
 from env import local_playlist_id, unique_playlist_id, local_music_path
 from local import read_song_files
 from spotify import write_spotify_liked_to_file, update_playlist, search_for_song
-from utils import print_c, print_r, file_to_array, print_b, fileSeperator, print_g
+from utils import print_c, print_r, file_to_array, print_b, fileSeperator, print_g, print_p
 from wth import wth_print_w, wth_print_p, wth_print_y, wth_print_r, wth_print_g, set_what
 
 
@@ -168,10 +168,12 @@ def process(a):
     return unidecode(normalize(a.lower()))
 
 
-convert = True
+convert = False
 
 
 def compare_song_maps(ignore_list, spotifile_dict, local_songs):
+    print_p(f"{len(local_songs) - len(ignore_list)} to be linked!")
+    print()
     no_match, match_ids, count = [], [], 0
     for local_song in local_songs:
         if local_song in ignore_list:
@@ -212,9 +214,8 @@ def compare_song_maps(ignore_list, spotifile_dict, local_songs):
         return []
     else:
         # and the sausage is done
-        print_g(f"all {count - len(ignore_list)} songs found and linked!")
+        print_g(f"all {count} songs found and linked!")
         return match_ids, list(spotifile_dict.values())
-
 
 if __name__ == "__main__":
     print_c(f"Running Spotify Local/App cleanup")
@@ -225,12 +226,11 @@ if __name__ == "__main__":
     # convert all songs in a given path to specified format
     # this attempts to keep tags/cover art as close to original as possible
     if convert:
-        music_convert(local_music_path, ['mp3', 'm4a'], 'mp3')
+        music_convert(local_music_path, ['mp3', 'm4a'], 'm4a')
     else:
         # search local folder and compare with unique
         local_songs_map = read_song_files(
-            local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], True)
-        search_for_song(local_songs_map)
+            local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], False)
 
         # get and write spotify liked to file
         spotify_song_map = write_spotify_liked_to_file(

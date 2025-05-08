@@ -77,7 +77,7 @@ def write_spotify_liked_to_file(cap, page_size, total_threads, write_to_liked_pa
 
     results = []
     # not 100% how to safely do this, look in threads.py, where it constructs helper functions to have a thread
-    # return its value, which I append to the above result array to further process below
+    # return its value, which I append to the above result array to further process below, what could possibly go wrong
     for t in threads:
         results += t.join()
 

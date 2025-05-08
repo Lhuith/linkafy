@@ -15,21 +15,45 @@ from pydub.utils import mediainfo
 
 from error import log_error
 from mutegen import mutey_get_tag, build_file_name
-from utils import extSeperator, print_b
+from utils import extSeperator, print_b, print_p, print_r, print_c, print_g, print_w
 
 
+# construct what the song file (not tag, but based off tag, so ... is tag now)
 def build_file_path(output_folder, title, artist, to):
+    # ironically removed this and now re-adding it because I don't learn
+    title = title.replace('/', '')
+    artist = artist.replace('/', '')
     return output_folder + "/" + f"{build_file_name(title, artist)}.{to}"
 
 
-def pydub_handle(ext_path, folder_path, output_folder, to):
+# handler for parallel workers, where the oompa-loompas (without singing) grab the audio data as well as metadata
+# using pydub mediainfo utils, then make a call to mutegen to grab the cover art bytes which we then, using dark
+# sorcery and very, very smart class conversions (totally on me, I'm lazy and 3 hours of color theory almost killed
+# me) reopen the newly created file and slap the image back in there, and the fun part is each media file type has a
+# different way of taking in image data ( ′～‵ )
+def pydub_handle(ext_path, output_folder, to):
     [ext, path] = ext_path.split(extSeperator)
-    print(ext, path, folder_path, output_folder, to)
-    song = None
-    new_name = path.replace(folder_path + "/", "")
 
+    # original tags, no album art :( </3
+    tags = mediainfo(path).get('TAG', {})
+
+    if len(tags) == 0:
+        log_error("tag parse issue", f"issue getting tags for {path}")
+        return
+
+    # new file name, based on tag title - artist
+    new_file_path = build_file_path(output_folder, tags['title'], tags['artist'], to)
+
+    song = None
+    # old mate mutey coming in clutch with the tag reading
     mutegen_tags = mutey_get_tag(path, ext)
     cover = mutegen_tags['cover']
+
+    # remove cover art data from media file tags (if we didn't mess up), it makes ffmpeg very mad
+    if len(tags) != 0:
+        tags.pop('COVERART', None)
+        tags.pop('COVERARTMIME', None)
+
     match ext:
         case 'mp3':
             song = AudioSegment.from_mp3(path)
@@ -38,15 +62,11 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
         case _:
             log_error("extension case error", f"extension {ext} not handled for conversion")
 
-    new_name = new_name.replace(f".{ext}", f".{to}")
     if song is None:
         log_error("song conversion failed", f"{path} failed to be read in")
         return
 
-    # original tags, no album art :(
-    tags = mediainfo(path).get('TAG', {})
-    new_file_path = build_file_path(output_folder, tags['title'], tags['artist'], to)
-    print(new_file_path)
+    print_g(new_file_path)
     match to:
         case 'mp3':
             song.export(new_file_path, format=to, bitrate='320k', tags=tags)
@@ -69,6 +89,7 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
             song.export(new_file_path, format=to, bitrate='320k', tags=tags)
             if cover != b'':
                 song_ogg = OggVorbis(new_file_path)
+                # bare witness to the pure, raw big brain energy
                 img = Image.open(io.BytesIO(bytes(cover)))
                 flac_image = Picture()
                 flac_image.width = img.width
@@ -81,15 +102,21 @@ def pydub_handle(ext_path, folder_path, output_folder, to):
                 song_ogg["metadata_block_picture"] = [base64.b64encode(flac_image.write()).decode("ascii")]
                 song_ogg.save()
         case 'm4a':
-            song.export(new_file_path, format='ipod', bitrate='320k', tags=tags)
+            try:
+                song.export(new_file_path, format='ipod', bitrate='320k', tags=tags)
 
-            # https://stackoverflow.com/questions/37897801/embedding-album-cover-in-mp4-file-using-mutagen
-            # seriously thank you, Simon Kirsten
-            if cover != b'':
-                # grab new song and add cover picture back, im sure there's an easier way to do this
-                song_mp4 = MP4(new_file_path)
-                song_mp4['covr'] = [MP4Cover(bytes(cover), imageformat=MP4Cover.FORMAT_JPEG)]
-                song_mp4.save()
+                # https://stackoverflow.com/questions/37897801/embedding-album-cover-in-mp4-file-using-mutagen
+                # seriously thank you, Simon Kirsten
+                if cover != b'':
+                    # grab new song and add cover picture back, im sure there's an easier way to do this (updated: there's
+                    # not)
+                    song_mp4 = MP4(new_file_path)
+                    song_mp4['covr'] = [MP4Cover(bytes(cover), imageformat=MP4Cover.FORMAT_JPEG)]
+                    song_mp4.save()
+            except:
+                log_error("export error", f"issue with {path}\n{new_file_path}")
+                print(tags.keys())
+                return
         case _:
             log_error("to case error", f"conversion to extension {to} handled")
 
@@ -108,4 +135,5 @@ def music_convert(folder_path, extensions, to):
 
     print_b(f'# of files are {len(local_paths)}')
 
-    Parallel(n_jobs=-1)(delayed(pydub_handle)(path, folder_path, output_folder, to) for path in local_paths)
+    Parallel(n_jobs=-1)(delayed(pydub_handle)(path, output_folder, to) for path in local_paths)
+
