@@ -1,6 +1,6 @@
 from mutagen.id3 import ID3
 from mutagen.mp4 import MP4
-
+from mutagen.flac import FLAC
 from error import log_error
 from utils import fileSeperator, fileNameSeperator, print_w
 
@@ -21,6 +21,12 @@ def mutey_get_tag(file, ext):
     artists = []
     cover = b''
     match ext:
+        case 'flac':
+            tags = FLAC(file)
+            title = tags['title']
+            artists = tags['artist']
+            if len(tags.pictures) != 0:
+                cover = tags.pictures[0].data
         case 'mp3':
             tags = ID3(file)
             title = tags['TIT2'].text

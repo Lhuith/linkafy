@@ -55,6 +55,8 @@ def pydub_handle(ext_path, output_folder, to):
         tags.pop('COVERARTMIME', None)
 
     match ext:
+        case 'flac':
+            song = AudioSegment.from_file(path, format='flac')
         case 'mp3':
             song = AudioSegment.from_mp3(path)
         case 'm4a':
