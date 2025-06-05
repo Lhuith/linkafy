@@ -29,6 +29,7 @@ def mutey_get_tag(file, ext):
                 cover = tags.pictures[0].data
         case 'mp3':
             tags = ID3(file)
+            # I don't know why or where TIT1 is
             title = tags['TIT2'].text
             artists = tags['TPE1'].text
             if 'APIC:' in tags:

@@ -33,6 +33,7 @@ def create_new_file_path(output_folder, path, to, tags):
         return
 
     if 'title' not in tags:
+        # was literally for just that one file, you know who you are
         if 'title'.upper() in tags:
             tags['title'] = tags['title'.upper()]
         else:
@@ -159,7 +160,7 @@ def pydub_handle(ext_path, output_folder, to):
 # witness the first instance of something smart done dumb or ... is it dumb done smart?
 # either case this just renames files based on their tags
 def music_rename(folder_path, extensions):
-    # set output path if not exist already
+    # check if the folder path exists, it's my own code and I still need training wheels and a helmet
     if os.path.exists(folder_path):
         print("output path exists")
     else:
@@ -168,14 +169,15 @@ def music_rename(folder_path, extensions):
 
     local_paths = [f"{ext}{extSeperator}{g}"
                    for ext in extensions for g in glob.glob(folder_path + f'/*.{ext}')]
+
     print_b(f'# of files are {len(local_paths)}')
 
     Parallel(n_jobs=-1)(delayed(pydub_handle_rename_files_by_tags)(path, folder_path) for path in local_paths)
 
-
 # takes a collection of music and to'afies them to your desired format, thus making them superior in every way
 def music_convert(folder_path, extensions, to):
     # set output path if not exist already
+    # leaving the above comment to illustrate an unga bunga comment
     output_folder = folder_path + f"/Conversion/{to.lower()}"
     if os.path.exists(output_folder):
         print("output path exists")
