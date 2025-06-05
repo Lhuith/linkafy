@@ -26,6 +26,38 @@ def build_file_path(output_folder, title, artist, to):
     return output_folder + "/" + f"{build_file_name(title, artist)}.{to}"
 
 
+def create_new_file_path(output_folder, path, to, tags):
+    if len(tags) == 0:
+        log_error("tag parse issue", f"issue getting tags for {path}")
+        return
+
+    if 'title' not in tags:
+        if 'title'.upper() in tags:
+            tags['title'] = tags['title'.upper()]
+        else:
+            print_r(f'{path} has not title')
+            print(tags)
+            return
+
+    if 'artist' not in tags:
+        if 'artist'.upper() in tags:
+            tags['artist'] = tags['artist'.upper()]
+        else:
+            print_r(f'{path} has not artist')
+            print(tags)
+            return
+
+    # new file name, based on tag title - artist
+    return build_file_path(output_folder, tags['title'], tags['artist'], to)
+
+
+def pydub_handle_rename_files_by_tags(ext_path, output_folder):
+    [ext, path] = ext_path.split(extSeperator)
+    new_file_path = create_new_file_path(output_folder, path, ext, mediainfo(path).get('TAG', {}))
+    print_p(f"renaming {path} to {new_file_path}")
+    os.rename(path, new_file_path)
+
+
 # handler for parallel workers, where the oompa-loompas (without singing) grab the audio data as well as metadata
 # using pydub mediainfo utils, then make a call to mutegen to grab the cover art bytes which we then, using dark
 # sorcery and very, very smart class conversions (totally on me, I'm lazy and 3 hours of color theory almost killed
@@ -37,12 +69,7 @@ def pydub_handle(ext_path, output_folder, to):
     # original tags, no album art :( </3
     tags = mediainfo(path).get('TAG', {})
 
-    if len(tags) == 0:
-        log_error("tag parse issue", f"issue getting tags for {path}")
-        return
-
-    # new file name, based on tag title - artist
-    new_file_path = build_file_path(output_folder, tags['title'], tags['artist'], to)
+    new_file_path = create_new_file_path(output_folder, path, to, tags)
 
     song = None
     # old mate mutey coming in clutch with the tag reading
@@ -121,6 +148,21 @@ def pydub_handle(ext_path, output_folder, to):
                 return
         case _:
             log_error("to case error", f"conversion to extension {to} handled")
+
+
+def music_rename(folder_path, extensions):
+    # set output path if not exist already
+    if os.path.exists(folder_path):
+        print("output path exists")
+    else:
+        print(f"folder path {folder_path} doesn't exist")
+        return
+
+    local_paths = [f"{ext}{extSeperator}{g}"
+                   for ext in extensions for g in glob.glob(folder_path + f'/*.{ext}')]
+    print_b(f'# of files are {len(local_paths)}')
+
+    Parallel(n_jobs=-1)(delayed(pydub_handle_rename_files_by_tags)(path, folder_path) for path in local_paths)
 
 
 # takes a collection of music and to'afies them to your desired format, thus making them superior in every way

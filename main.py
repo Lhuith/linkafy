@@ -3,7 +3,7 @@ import re
 from rapidfuzz import fuzz as rapidfuzz
 from unidecode import unidecode
 
-from conversion import music_convert
+from conversion import music_convert, music_rename
 from env import local_playlist_id, unique_playlist_id, local_music_path, removed_playlist_id
 from local import read_song_files
 from spotify import write_spotify_liked_to_file, update_playlist, search_for_song
@@ -169,7 +169,7 @@ def process(a):
 
 
 convert = True
-
+rename = False
 
 def compare_song_maps(ignore_list, spotifile_dict, local_songs):
     print_p(f"{len(local_songs) - len(ignore_list)} to be linked!")
@@ -211,7 +211,7 @@ def compare_song_maps(ignore_list, spotifile_dict, local_songs):
         print_r(f"{len(local_songs) - count} didn't match")
         for no in no_match:
             print_r(f"{no[0]}\n -- {no[1]}")
-        return []
+        return [], []
     else:
         # and the sausage is done
         print_g(f"all {count} songs found and linked!")
@@ -227,31 +227,34 @@ if __name__ == "__main__":
     # this attempts to keep tags/cover art as close to original as possible
     if convert:
         print("converting!")
-        music_convert(local_music_path, ['mp3', 'flac'], 'm4a')
+        # music_convert(local_music_path, ['m4a', 'mp3', 'flac'], 'm4a')
+    elif rename:
+        print("renaming!")
+        music_rename(local_music_path, ['m4a', 'mp3', 'flac'])
     else:
         print("organizing!!!")
         # search local folder and compare with unique
-        # local_songs_map = read_song_files(
-        #     local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], False)
-        #
-        # # get and write spotify liked to file
-        # spotify_song_map = write_spotify_liked_to_file(
-        #     1, 50, 5, "output/liked_songs.txt", "output/unique_liked_songs.txt")
-        #
-        # # string in checker, look at wth.py, checks both spotify and local songs for certain title during search
-        # # and prints out the matching/normalization process
-        # set_what("")
-        # # compare and return
-        # track_ids, removed_track_ids = compare_song_maps(not_in_spotify, spotify_song_map, local_songs_map)
-        #
-        # if len(removed_track_ids) != 0:
-        #     update_playlist(removed_playlist_id, removed_track_ids)
+        local_songs_map = read_song_files(
+            local_music_path, "output/local_songs.txt", ['mp3', 'm4a'], False)
+
+        # get and write spotify liked to file
+        spotify_song_map = write_spotify_liked_to_file(
+            1, 50, 5, "output/liked_songs.txt", "output/unique_liked_songs.txt")
+
+        # string in checker, look at wth.py, checks both spotify and local songs for certain title during search
+        # and prints out the matching/normalization process
+        set_what("")
+        # compare and return
+        track_ids, removed_track_ids = compare_song_maps(not_in_spotify, spotify_song_map, local_songs_map)
+
+        if len(removed_track_ids) != 0:
+            update_playlist(removed_playlist_id, removed_track_ids)
 
         # create playlist with match songs
         # only if all songs were accounted for (cleaned, matched and excluded in not_in_spotify.txt)
-        # if len(track_ids) != 0:
-        #     update_playlist(local_playlist_id, track_ids, 5)
-        #
+        if len(track_ids) != 0:
+            update_playlist(local_playlist_id, track_ids, 5)
+
         # if len(unique_liked_track_ids) != 0:
         #     if len(unique_liked_track_ids) != 0:
         #         update_playlist(unique_playlist_id, unique_liked_track_ids)
