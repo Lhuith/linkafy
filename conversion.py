@@ -26,6 +26,7 @@ def build_file_path(output_folder, title, artist, to):
     return output_folder + "/" + f"{build_file_name(title, artist)}.{to}"
 
 
+# creating new output file name + path based on tags for less stink and more good
 def create_new_file_path(output_folder, path, to, tags):
     if len(tags) == 0:
         log_error("tag parse issue", f"issue getting tags for {path}")
@@ -35,7 +36,7 @@ def create_new_file_path(output_folder, path, to, tags):
         if 'title'.upper() in tags:
             tags['title'] = tags['title'.upper()]
         else:
-            print_r(f'{path} has not title')
+            print_r(f'{path} has no title')
             print(tags)
             return
 
@@ -43,7 +44,7 @@ def create_new_file_path(output_folder, path, to, tags):
         if 'artist'.upper() in tags:
             tags['artist'] = tags['artist'.upper()]
         else:
-            print_r(f'{path} has not artist')
+            print_r(f'{path} has no artist')
             print(tags)
             return
 
@@ -51,10 +52,15 @@ def create_new_file_path(output_folder, path, to, tags):
     return build_file_path(output_folder, tags['title'], tags['artist'], to)
 
 
+# sometimes sticking to a naming convention goes against your better judgement
+# but hey ... comment about it!
 def pydub_handle_rename_files_by_tags(ext_path, output_folder):
     [ext, path] = ext_path.split(extSeperator)
     new_file_path = create_new_file_path(output_folder, path, ext, mediainfo(path).get('TAG', {}))
+
     print_p(f"renaming {path} to {new_file_path}")
+    print_w('')
+
     os.rename(path, new_file_path)
 
 
@@ -150,6 +156,8 @@ def pydub_handle(ext_path, output_folder, to):
             log_error("to case error", f"conversion to extension {to} handled")
 
 
+# witness the first instance of something smart done dumb or ... is it dumb done smart?
+# either case this just renames files based on their tags
 def music_rename(folder_path, extensions):
     # set output path if not exist already
     if os.path.exists(folder_path):
